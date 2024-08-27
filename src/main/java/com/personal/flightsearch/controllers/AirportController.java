@@ -30,20 +30,18 @@ public class AirportController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<Airport> getAirport(Long airportId) {
+    @GetMapping("/{airportId}")
+    public ResponseEntity<AirportDTO> getAirport(@PathVariable Long airportId) {
         if (airportId != null && airportService.getAirport(airportId).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return airportService.getAirport(airportId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(airportMapper.map(airportService.getAirport(airportId).get()));
     }
 
     @PostMapping
-    public ResponseEntity<String> saveAirport(Airport airport) {
+    public ResponseEntity<String> saveAirport(AirportDTO airportDTO) {
         try {
-            airportService.saveAirport(airport);
+            airportService.saveAirport(airportMapper.reverseMap(airportDTO));
             return new ResponseEntity<>("Airport saved successfully",
                     org.springframework.http.HttpStatus.CREATED);
         } catch (Exception ex) {
@@ -52,7 +50,7 @@ public class AirportController {
         }
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{airportId}")
     public ResponseEntity<String> deleteAirport(@PathVariable Long airportId) {
         try {
             airportService.deleteAirport(airportId);
@@ -64,15 +62,14 @@ public class AirportController {
         }
     }
 
-    @PutMapping
-    public ResponseEntity<Airport> updateAirport(@PathVariable Long airportId, @RequestBody Airport airport) {
+    @PutMapping("/{airportId}")
+    public ResponseEntity<AirportDTO> updateAirport(@PathVariable Long airportId,
+                                                    @RequestBody AirportDTO airportDTO) {
         try {
-            airportService.updateAirport(airportId, airport);
-            return ResponseEntity.ok(airport);
+            airportService.updateAirport(airportId, airportMapper.reverseMap(airportDTO));
+            return ResponseEntity.ok(airportDTO);
         } catch (Exception ex) {
             return ResponseEntity.notFound().build();
         }
     }
-
-
 }
